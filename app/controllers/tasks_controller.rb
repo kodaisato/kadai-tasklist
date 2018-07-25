@@ -1,14 +1,13 @@
 class TasksController < ApplicationController
-  before_action :set_task, only: [:show, :edit, :update, :destory]
-  
-  
   before_action :require_user_logged_in
-
+  before_action :set_task, only: [:show, :edit, :update, :destory]
+  before_action :current_user, only: [:index, :show, :edit, :create, :update, :destroy]
   
   def index
     if logged_in?
     @user = current_user
-    @tasks = Task.order(created_at: :desc).page(params[:page]).per(12)
+    @task = current_user.tasks.build
+    @tasks = current_user.tasks.order(created_at DESC).page(params[:page])
   end
   end
   
@@ -62,6 +61,13 @@ class TasksController < ApplicationController
   
   def task_params
     params.require(:task).permit(:content, :status)
+  end
+  
+  def current_user
+    @task = current_user.microposts.find_by(id: params[:id])
+    unless @microposts
+      redirect_to root_url
+    end
   end
   
 end
